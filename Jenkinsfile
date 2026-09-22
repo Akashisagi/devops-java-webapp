@@ -2,6 +2,8 @@ pipeline {
     agent any
 
     environment {
+        DOCKER_HUB_USER = 'prawin03sm'
+        IMAGE_NAME = "${env.DOCKER_HUB_USER}/devops-webapp"
         JAVA_HOME = '/usr/lib/jvm/java-21-openjdk-amd64'
         PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
     }
@@ -27,10 +29,18 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh 'docker build -t devops-webapp:latest .'
+                script {
+                    // Log into Docker Hub using credentials stored in Jenkins
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                        sh 'echo $PASS | docker login -u $USER --password-stdin'
+                    }
+                    // Build and push image to Docker Hub
+                    sh "docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} -t ${IMAGE_NAME}:latest ."
+                    sh "docker push ${IMAGE_NAME}:${BUILD_NUMBER}"
+                    sh "docker push ${IMAGE_NAME}:latest"
+                }
             }
         }
-
         stage('Deploy via Ansible') {
             steps {
                 sh 'ansible-playbook -i ansible/inventory ansible/deploy.yml'
