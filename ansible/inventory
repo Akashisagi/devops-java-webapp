@@ -1,5 +1,5 @@
 [app]
-app-server ansible_host=<APP_EC2_PRIVATE_IP>
+app-server ansible_host=10.0.91.5
 
 [app:vars]
 ansible_user=ubuntu
