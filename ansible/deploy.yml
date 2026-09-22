@@ -3,6 +3,12 @@
   become: true
 
   tasks:
+    - name: Pull latest image from Docker Hub
+      community.docker.docker_image:
+        name: prawin03sm/devops-webapp
+        tag: latest
+        source: pull
+        
     - name: Stop and remove old container if running
       community.docker.docker_container:
         name: devops-webapp
